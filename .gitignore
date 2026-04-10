@@ -1,0 +1,6 @@
+.DS_Store
+.theos/
+outputs/
+roothide/
+rootless/
+docs/

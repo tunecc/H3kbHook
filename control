@@ -1,0 +1,9 @@
+Package: com.tune.h3kbhook
+Name: H3kbHook
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: stable h3kb pro unlock package for app and keyboard extension
+Maintainer: Tune
+Author: Tune
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000)

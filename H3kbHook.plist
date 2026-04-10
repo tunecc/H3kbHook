@@ -1,0 +1,8 @@
+{
+    Filter = {
+        Bundles = (
+            "com.ihsiao.apps.Hamster3",
+            "com.ihsiao.apps.Hamster3.Keyboard"
+        );
+    };
+}
