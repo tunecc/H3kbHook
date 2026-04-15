@@ -11,6 +11,7 @@ static NSString *const kH3kbPurchaseStateDefaultsKey = @"com.ihsiao.apps.Hamster
 static const uintptr_t kMachOBaseAddress = 0x100000000ULL;
 static const uintptr_t kPurchasedStateOffset = 0x98;
 static const uintptr_t kInteractionsStoreOffset = 0x58;
+// purchaseIDs is the in-instance Array<String> that matches ownedConsumables' return type.
 static const uintptr_t kPurchaseIDsOffset = 0xB8;
 
 static const uint8_t kPersistedStateLoadSignature[] = {
@@ -71,46 +72,46 @@ static BOOL H3kbInteractionsPurchasedStateGetterReplacement(void *self);
 
 static H3kbFunctionHook gAppHooks[] = {
     H3KB_HOOK("persistedState.load",
-              0x314988,
+              0x31497c,
               kPersistedStateLoadSignature,
               &H3kbPersistedStateLoadReplacement),
     H3KB_HOOK("store.purchasedState.getter",
-              0x314ab4,
+              0x314aa8,
               kStorePurchasedStateGetterSignature,
               &H3kbStorePurchasedStateGetterReplacement),
     H3KB_HOOK("store.purchasedState.setter",
-              0x314ae4,
+              0x314ad8,
               kStorePurchasedStateSetterSignature,
               &H3kbStorePurchasedStateSetterReplacement),
     H3KB_HOOK("store.ownedConsumables.getter",
-              0x314b8c,
+              0x314b80,
               kStoreOwnedConsumablesGetterSignature,
               &H3kbStoreOwnedConsumablesGetterReplacement),
     H3KB_HOOK("interactions.purchasedState.getter",
-              0x31f09c,
+              0x31f090,
               kInteractionsPurchasedStateGetterSignature,
               &H3kbInteractionsPurchasedStateGetterReplacement),
 };
 
 static H3kbFunctionHook gPluginHooks[] = {
     H3KB_HOOK("persistedState.load",
-              0x25af34,
+              0x25af28,
               kPersistedStateLoadSignature,
               &H3kbPersistedStateLoadReplacement),
     H3KB_HOOK("store.purchasedState.getter",
-              0x25b060,
+              0x25b054,
               kStorePurchasedStateGetterSignature,
               &H3kbStorePurchasedStateGetterReplacement),
     H3KB_HOOK("store.purchasedState.setter",
-              0x25b090,
+              0x25b084,
               kStorePurchasedStateSetterSignature,
               &H3kbStorePurchasedStateSetterReplacement),
     H3KB_HOOK("store.ownedConsumables.getter",
-              0x25b138,
+              0x25b12c,
               kStoreOwnedConsumablesGetterSignature,
               &H3kbStoreOwnedConsumablesGetterReplacement),
     H3KB_HOOK("interactions.purchasedState.getter",
-              0x265688,
+              0x26567c,
               kInteractionsPurchasedStateGetterSignature,
               &H3kbInteractionsPurchasedStateGetterReplacement),
 };
