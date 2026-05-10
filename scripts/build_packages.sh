@@ -21,8 +21,8 @@ if [ -z "$ROOTFUL_DEB" ]; then
     echo "ERROR: rootful .deb not found"
     exit 1
 fi
-# Replace arch suffix with iphoneos-arm for rootful
-ROOTFUL_OUT="$OUTPUT_DIR/$(basename "$ROOTFUL_DEB" | sed 's/iphoneos-arm64/iphoneos-arm/')"
+# Rename: iphoneos-arm64 → iphoneos-arm_rootful
+ROOTFUL_OUT="$OUTPUT_DIR/$(basename "$ROOTFUL_DEB" | sed 's/_iphoneos-arm64/_iphoneos-arm_rootful/')"
 cp "$ROOTFUL_DEB" "$ROOTFUL_OUT"
 echo "rootful: $(basename "$ROOTFUL_OUT") → outputs/"
 
@@ -37,8 +37,9 @@ if [ -z "$ROOTLESS_DEB" ]; then
     echo "ERROR: rootless .deb not found"
     exit 1
 fi
-cp "$ROOTLESS_DEB" "$OUTPUT_DIR/"
-echo "rootless: $(basename "$ROOTLESS_DEB") → outputs/"
+ROOTLESS_OUT="$OUTPUT_DIR/$(basename "$ROOTLESS_DEB" | sed 's/\.deb$/_rootless.deb/')"
+cp "$ROOTLESS_DEB" "$ROOTLESS_OUT"
+echo "rootless: $(basename "$ROOTLESS_OUT") → outputs/"
 
 # ── roothide ─────────────────────────────────────────────────────
 echo ""
@@ -51,8 +52,9 @@ if [ -z "$ROOTHIDE_DEB" ]; then
     echo "ERROR: roothide .deb not found"
     exit 1
 fi
-cp "$ROOTHIDE_DEB" "$OUTPUT_DIR/"
-echo "roothide: $(basename "$ROOTHIDE_DEB") → outputs/"
+ROOTHIDE_OUT="$OUTPUT_DIR/$(basename "$ROOTHIDE_DEB" | sed 's/\.deb$/_roothide.deb/')"
+cp "$ROOTHIDE_DEB" "$ROOTHIDE_OUT"
+echo "roothide: $(basename "$ROOTHIDE_OUT") → outputs/"
 
 # ── verify ───────────────────────────────────────────────────────
 echo ""
