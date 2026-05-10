@@ -20,26 +20,35 @@ static const uintptr_t kPurchaseIDsOffsetFallback = 0xB8;
 static const uint8_t kPersistedStateLoadSignature[] = {
     0xff, 0x83, 0x01, 0xd1, 0xf8, 0x5f, 0x02, 0xa9,
     0xf6, 0x57, 0x03, 0xa9, 0xf4, 0x4f, 0x04, 0xa9,
+    0xfd, 0x7b, 0x05, 0xa9, 0xfd, 0x43, 0x01, 0x91,
 };
 
 static const uint8_t kStorePurchasedStateGetterSignature[] = {
     0xff, 0xc3, 0x00, 0xd1, 0xfd, 0x7b, 0x02, 0xa9,
     0xfd, 0x83, 0x00, 0x91, 0x80, 0x62, 0x02, 0x91,
+    0xe1, 0x23, 0x00, 0x91, 0x02, 0x00, 0x80, 0xd2,
+    0x03, 0x00, 0x80, 0xd2,
 };
 
 static const uint8_t kStorePurchasedStateSetterSignature[] = {
     0xff, 0x43, 0x01, 0xd1, 0xf6, 0x57, 0x02, 0xa9,
     0xf4, 0x4f, 0x03, 0xa9, 0xfd, 0x7b, 0x04, 0xa9,
+    0xfd, 0x03, 0x01, 0x91, 0xf3, 0x03, 0x00, 0xaa,
+    0x80, 0x62, 0x02, 0x91, 0xe1, 0x23, 0x00, 0x91,
+    0x22, 0x00, 0x80, 0x52, 0x03, 0x00, 0x80, 0xd2,
 };
 
 static const uint8_t kStoreOwnedConsumablesGetterSignature[] = {
     0xff, 0x43, 0x02, 0xd1, 0xf6, 0x57, 0x06, 0xa9,
     0xf4, 0x4f, 0x07, 0xa9, 0xfd, 0x7b, 0x08, 0xa9,
+    0xfd, 0x03, 0x02, 0x91,
 };
 
 static const uint8_t kInteractionsPurchasedStateGetterSignature[] = {
     0xff, 0x03, 0x01, 0xd1, 0xf4, 0x4f, 0x02, 0xa9,
     0xfd, 0x7b, 0x03, 0xa9, 0xfd, 0xc3, 0x00, 0x91,
+    0x93, 0x2e, 0x40, 0xf9, 0x60, 0x62, 0x02, 0x91,
+    0xe1, 0x23, 0x00, 0x91, 0x02, 0x00, 0x80, 0xd2,
 };
 
 typedef struct {
@@ -83,13 +92,18 @@ static void H3kbStorePurchasedStateSetterReplacement(void *self, BOOL value);
 static void *H3kbStoreOwnedConsumablesGetterReplacement(void *self);
 static BOOL H3kbInteractionsPurchasedStateGetterReplacement(void *self);
 static void H3kbResolveRuntimeLayout(void);
+static void *H3kbFollowBranchStub(void *stubAddress);
+static void *H3kbFindSignatureAroundAnchor(const void *anchorAddress,
+                                           size_t searchRadius,
+                                           const uint8_t *signature,
+                                           size_t signatureLength);
 
 static const char *const kInAppPurchaseStoreClassName = "_TtC10HamsterKit18InAppPurchaseStore";
 static const char *const kReduxInAppPurchaseUserInteractionsClassName =
     "_TtC10HamsterKit34ReduxInAppPurchaseUserInteractions";
 
 static const char *const kPersistedStateLoadSymbolName =
-    "_$s10HamsterKit18InAppPurchaseStoreC14purchasedStateSbvpfi_0";
+    "_$s10HamsterKit18InAppPurchaseStoreC14purchasedStateSbvpfi";
 static const char *const kStorePurchasedStateGetterSymbolName =
     "_$s10HamsterKit18InAppPurchaseStoreC14purchasedStateSbvg";
 static const char *const kStoreOwnedConsumablesGetterSymbolName =
@@ -100,32 +114,32 @@ static const char *const kInteractionsPurchasedStateGetterSymbolName =
 static H3kbFunctionHook gAppHooks[] = {
     H3KB_HOOK("persistedState.load",
               kPersistedStateLoadSymbolName,
-              NULL,
-              0x31497c,
+              kStorePurchasedStateGetterSymbolName,
+              0x313c5c,
               kPersistedStateLoadSignature,
               &H3kbPersistedStateLoadReplacement),
     H3KB_HOOK("store.purchasedState.getter",
               kStorePurchasedStateGetterSymbolName,
               NULL,
-              0x314aa8,
+              0x313d88,
               kStorePurchasedStateGetterSignature,
               &H3kbStorePurchasedStateGetterReplacement),
     H3KB_HOOK("store.purchasedState.setter",
               NULL,
               kStorePurchasedStateGetterSymbolName,
-              0x314ad8,
+              0x313db8,
               kStorePurchasedStateSetterSignature,
               &H3kbStorePurchasedStateSetterReplacement),
     H3KB_HOOK("store.ownedConsumables.getter",
               kStoreOwnedConsumablesGetterSymbolName,
               NULL,
-              0x314b80,
+              0x313e60,
               kStoreOwnedConsumablesGetterSignature,
               &H3kbStoreOwnedConsumablesGetterReplacement),
     H3KB_HOOK("interactions.purchasedState.getter",
               kInteractionsPurchasedStateGetterSymbolName,
               NULL,
-              0x31f090,
+              0x31e370,
               kInteractionsPurchasedStateGetterSignature,
               &H3kbInteractionsPurchasedStateGetterReplacement),
 };
@@ -133,32 +147,32 @@ static H3kbFunctionHook gAppHooks[] = {
 static H3kbFunctionHook gPluginHooks[] = {
     H3KB_HOOK("persistedState.load",
               kPersistedStateLoadSymbolName,
-              NULL,
-              0x25af28,
+              kStorePurchasedStateGetterSymbolName,
+              0x257ee0,
               kPersistedStateLoadSignature,
               &H3kbPersistedStateLoadReplacement),
     H3KB_HOOK("store.purchasedState.getter",
               kStorePurchasedStateGetterSymbolName,
               NULL,
-              0x25b054,
+              0x25800c,
               kStorePurchasedStateGetterSignature,
               &H3kbStorePurchasedStateGetterReplacement),
     H3KB_HOOK("store.purchasedState.setter",
               NULL,
               kStorePurchasedStateGetterSymbolName,
-              0x25b084,
+              0x25803c,
               kStorePurchasedStateSetterSignature,
               &H3kbStorePurchasedStateSetterReplacement),
     H3KB_HOOK("store.ownedConsumables.getter",
               kStoreOwnedConsumablesGetterSymbolName,
               NULL,
-              0x25b12c,
+              0x2580e4,
               kStoreOwnedConsumablesGetterSignature,
               &H3kbStoreOwnedConsumablesGetterReplacement),
     H3KB_HOOK("interactions.purchasedState.getter",
               kInteractionsPurchasedStateGetterSymbolName,
               NULL,
-              0x26567c,
+              0x262634,
               kInteractionsPurchasedStateGetterSignature,
               &H3kbInteractionsPurchasedStateGetterReplacement),
 };
@@ -433,6 +447,49 @@ static void H3kbResolveRuntimeLayout(void) {
                                                      kInteractionsStoreOffsetFallback);
 }
 
+static void *H3kbFollowBranchStub(void *stubAddress) {
+    if (!stubAddress) {
+        return NULL;
+    }
+
+    uint32_t instruction = *(uint32_t *)stubAddress;
+    // ARM64 B (unconditional branch immediate): bits 31:26 == 000101
+    if ((instruction & 0xFC000000) != 0x14000000) {
+        return NULL;
+    }
+
+    int64_t imm26 = instruction & 0x03FFFFFF;
+    // Sign-extend from 26 bits
+    if (imm26 & 0x02000000) {
+        imm26 |= 0xFFFFFFFFFC000000LL;
+    }
+
+    return (uint8_t *)stubAddress + (imm26 * 4);
+}
+
+static void *H3kbFindSignatureAroundAnchor(const void *anchorAddress,
+                                           size_t searchRadius,
+                                           const uint8_t *signature,
+                                           size_t signatureLength) {
+    // Scan forward from anchor
+    void *match =
+        H3kbFindSignatureNearAddress(anchorAddress, searchRadius, signature, signatureLength);
+    if (match) {
+        return match;
+    }
+
+    // Scan backward from anchor
+    if (searchRadius > 0 && (uintptr_t)anchorAddress > searchRadius) {
+        const uint8_t *backStart = (const uint8_t *)anchorAddress - searchRadius;
+        match = H3kbFindSignatureNearAddress(backStart, searchRadius, signature, signatureLength);
+        if (match) {
+            return match;
+        }
+    }
+
+    return NULL;
+}
+
 static void *H3kbResolveHookAddress(const H3kbLoadedImage *image, const H3kbFunctionHook *hook) {
     if (!image || !hook) {
         return NULL;
@@ -441,6 +498,11 @@ static void *H3kbResolveHookAddress(const H3kbLoadedImage *image, const H3kbFunc
     if (hook->symbolName) {
         void *symbolAddress = H3kbResolveSymbolInImage(image, hook->symbolName);
         if (symbolAddress) {
+            void *realTarget = H3kbFollowBranchStub(symbolAddress);
+            if (realTarget
+                && H3kbAddressMatchesSignature(realTarget, hook->signature, hook->signatureLength)) {
+                return realTarget;
+            }
             return symbolAddress;
         }
     }
@@ -448,8 +510,8 @@ static void *H3kbResolveHookAddress(const H3kbLoadedImage *image, const H3kbFunc
     if (hook->anchorSymbolName) {
         void *anchorAddress = H3kbResolveSymbolInImage(image, hook->anchorSymbolName);
         if (anchorAddress) {
-            void *nearMatch =
-                H3kbFindSignatureNearAddress(anchorAddress, 0x200, hook->signature, hook->signatureLength);
+            void *nearMatch = H3kbFindSignatureAroundAnchor(anchorAddress, 0x200, hook->signature,
+                                                            hook->signatureLength);
             if (nearMatch) {
                 return nearMatch;
             }
